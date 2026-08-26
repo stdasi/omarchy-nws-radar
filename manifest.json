@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "id": "stdasi.nws-radar",
+  "name": "NWS Radar",
+  "version": "0.1.0",
+  "author": "stdasi",
+  "license": "MIT",
+  "description": "NWS radar image and severe weather alert notifications, sourced from api.weather.gov",
+  "kinds": ["bar-widget"],
+  "entryPoints": { "barWidget": "Panel.qml" },
+  "barWidget": {
+    "displayName": "NWS Radar",
+    "description": "NWS radar image with severe weather alert notifications",
+    "category": "Info",
+    "allowMultiple": false,
+    "defaultSection": "center",
+    "defaults": {
+      "alertPollIntervalSec": 300,
+      "radarRefreshIntervalSec": 300,
+      "radarRangeMiles": 150,
+      "minNotifySeverity": "Moderate",
+      "userAgentContact": ""
+    },
+    "schema": [
+      { "key": "alertPollIntervalSec", "type": "integer", "label": "Alert poll interval (seconds)", "min": 60, "max": 3600, "step": 30, "defaultValue": 300 },
+      { "key": "radarRefreshIntervalSec", "type": "integer", "label": "Radar image refresh (seconds)", "min": 60, "max": 1800, "step": 30, "defaultValue": 300 },
+      { "key": "radarRangeMiles", "type": "integer", "label": "Radar range (miles)", "min": 25, "max": 500, "step": 25, "defaultValue": 150 },
+      { "key": "minNotifySeverity", "type": "enum", "label": "Minimum severity to notify", "options": ["Extreme", "Severe", "Moderate", "Minor", "Unknown"], "defaultValue": "Moderate" },
+      { "key": "userAgentContact", "type": "string", "label": "NWS API contact (email or URL)", "defaultValue": "", "description": "Required by api.weather.gov's User-Agent policy, e.g. you@example.com" }
+    ]
+  }
+}

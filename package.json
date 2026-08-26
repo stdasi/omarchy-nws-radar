@@ -1,0 +1,9 @@
+{
+  "name": "omarchy-nws-radar",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Tests for the NWS Radar Omarchy plugin",
+  "scripts": {
+    "test": "node --test"
+  }
+}
