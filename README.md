@@ -41,8 +41,9 @@ notification lets you know before you even open the panel.
 
 - An Omarchy release with shell plugin support (tested with Omarchy 4.0.1).
 - `curl`, which is included with Omarchy.
-- A location configured in Omarchy's built-in Weather widget.
-- Network access to `api.weather.gov` and `opengeo.ncep.noaa.gov`.
+- An explicit or automatically detected location in Omarchy's built-in
+  Weather widget.
+- Network access to `api.weather.gov`, `opengeo.ncep.noaa.gov`, and `wttr.in`.
 
 NWS radar and alert coverage is focused on the United States and its
 territories. Locations outside that coverage area will not produce useful
@@ -60,10 +61,12 @@ omarchy bar put stdasi.nws-radar --section center
 
 ## Setup
 
-1. **Set a location.** This plugin reads the same location as Omarchy's
-   built-in Weather widget — open Weather's settings and set (or
-   auto-detect) your location once, and NWS Radar picks it up
-   automatically. It never writes that file itself.
+1. **Confirm your location.** This plugin reads an explicitly saved location
+   from Omarchy's built-in Weather widget. If Weather is using its default
+   IP-based auto-detection, NWS Radar performs the same detection itself and
+   labels the location `(auto)`. To override it, click the location name in
+   Weather, search for your city, and select a suggestion. NWS Radar picks up
+   the saved coordinates automatically and never writes that file itself.
 2. **Add a contact for the NWS API.** `api.weather.gov` requires every
    request to identify who's calling. Set the contact to an email address:
 
@@ -135,10 +138,13 @@ only every ~5 minutes and can't be composited with alert overlays this way.
 ## Privacy and network access
 
 The plugin reads your Weather widget location locally and does not modify it.
-Your coordinates and configured contact are sent to `api.weather.gov` when
-resolving the nearby radar station and checking alerts. Radar image requests
-go to `opengeo.ncep.noaa.gov`; their map bounds reveal the approximate center
-of the requested area, but your NWS contact is not sent to that service.
+When Weather has no explicitly saved location, the plugin requests `wttr.in`'s
+weather response to derive an approximate location from your public IP. Your
+coordinates and configured contact are sent to `api.weather.gov` when resolving
+the nearby radar station and checking alerts. Radar image requests go to
+`opengeo.ncep.noaa.gov`; their map bounds reveal the approximate center of the
+requested area, but your NWS contact is not sent to either `wttr.in` or the map
+server.
 
 The plugin stores active-alert IDs in Omarchy's persistent plugin properties
 to avoid sending the same desktop notification repeatedly. It stores no radar
@@ -168,6 +174,9 @@ A few design notes for anyone digging into the code:
   `api.weather.gov/points` and is informational only — the radar mosaic is
   seamless across station boundaries, so the imagery itself isn't tied to
   a single station.
+- An `(auto)` location is approximate and comes from the same IP-based
+  `wttr.in` fallback used by the built-in Weather widget. Saving a location in
+  Weather replaces it with exact shared coordinates.
 
 ## License
 

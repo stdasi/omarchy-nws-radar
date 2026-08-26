@@ -39,18 +39,51 @@ Item {
 
   // Location, read-only from the file the built-in Weather plugin owns.
   property var locationState: ({ name: "", latitude: null, longitude: null })
+  property string locationSource: ""
+  property bool autoLocationAttempted: false
+  property string locationError: ""
   readonly property string locationName: locationState.name
   readonly property real latitude: locationState.latitude
   readonly property real longitude: locationState.longitude
   readonly property bool hasLocation: locationState.latitude !== null && locationState.longitude !== null
+  readonly property bool detectingLocation: autoLocationProc.running
+
+  function applyLocationFile(raw) {
+    var parsed = Model.parseLocationFile(raw)
+    if (parsed.latitude !== null && parsed.longitude !== null) {
+      root.locationSource = "weather"
+      root.locationError = ""
+      root.locationState = parsed
+      return
+    }
+
+    // A missing file means Weather is using IP auto-detection. Preserve an
+    // already-resolved automatic location across FileView reloads; otherwise
+    // resolve the same wttr.in nearest-area data ourselves.
+    if (root.locationSource === "weather") {
+      root.locationState = ({ name: "", latitude: null, longitude: null })
+      root.locationSource = ""
+      root.autoLocationAttempted = false
+    }
+    requestAutoLocation(false)
+  }
+
+  function requestAutoLocation(force) {
+    if (root.locationSource === "weather" || autoLocationProc.running) return
+    if (root.autoLocationAttempted && !force) return
+    root.autoLocationAttempted = true
+    root.locationError = ""
+    autoLocationProc.command = ["curl", "-fsS", "--max-time", "10", "https://wttr.in/?format=j1"]
+    autoLocationProc.running = true
+  }
 
   property FileView locationFile: FileView {
     path: Quickshell.env("HOME") + "/.local/state/omarchy/settings/weather.json"
     watchChanges: true
     printErrors: false
     onFileChanged: reload()
-    onLoaded: root.locationState = Model.parseLocationFile(text())
-    onLoadFailed: root.locationState = Model.parseLocationFile("")
+    onLoaded: root.applyLocationFile(text())
+    onLoadFailed: root.applyLocationFile("")
   }
 
   property string stationId: ""
@@ -90,6 +123,7 @@ Item {
 
   function refreshNow() {
     locationFile.reload()
+    if (root.locationSource !== "weather") requestAutoLocation(true)
     refreshRadarFrame()
     if (root.hasLocation) fetchAlerts()
   }
@@ -166,6 +200,26 @@ Item {
     root.frameTime = ""
     refreshRadarFrame()
     if (root.hasLocation) fetchAlerts()
+  }
+
+  Process {
+    id: autoLocationProc
+    stdout: StdioCollector {
+      waitForEnd: true
+      onStreamFinished: {
+        // An explicit Weather location may have arrived while this request was
+        // running; it always wins over automatic detection.
+        if (root.locationSource === "weather") return
+        var parsed = Model.parseAutoLocationResponse(text)
+        if (parsed.latitude === null || parsed.longitude === null) {
+          root.locationError = "Could not auto-detect a location. Set one in the built-in Weather widget, then refresh."
+          return
+        }
+        root.locationError = ""
+        root.locationSource = "auto"
+        root.locationState = parsed
+      }
+    }
   }
 
   Process {

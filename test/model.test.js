@@ -11,6 +11,23 @@ test("parses and validates shared Weather locations", () => {
   })
 })
 
+test("parses an IP-detected wttr.in nearest area", () => {
+  const location = Model.parseAutoLocationResponse(JSON.stringify({ nearest_area: [{
+    areaName: [{ value: "Amarillo" }],
+    region: [{ value: "Texas" }],
+    country: [{ value: "United States of America" }],
+    latitude: "35.207", longitude: "-101.834"
+  }] }))
+  assert.deepEqual(location, {
+    name: "Amarillo, Texas, United States of America",
+    latitude: 35.207,
+    longitude: -101.834
+  })
+  assert.deepEqual(Model.parseAutoLocationResponse("invalid"), {
+    name: "", latitude: null, longitude: null
+  })
+})
+
 test("parses NWS alerts and supplies safe defaults", () => {
   const alerts = Model.parseAlerts(JSON.stringify({ features: [{ properties: {
     id: "alert-1", event: "Thunderstorm Warning", severity: "Severe",

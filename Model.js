@@ -23,6 +23,38 @@ function parseLocationFile(raw) {
   }
 }
 
+// wttr.in j1 response -> the IP-detected nearest area. This is the same
+// source the built-in Weather panel uses when weather.json is absent.
+function parseAutoLocationResponse(raw) {
+  var unset = { name: "", latitude: null, longitude: null }
+  try {
+    var data = JSON.parse(String(raw || ""))
+    var areas = data && data.nearest_area ? data.nearest_area : []
+    var area = areas.length ? areas[0] : null
+    if (!area) return unset
+
+    var latitude = parseFloat(area.latitude)
+    var longitude = parseFloat(area.longitude)
+    if (!isFinite(latitude) || !isFinite(longitude)
+        || latitude < -90 || latitude > 90
+        || longitude < -180 || longitude > 180) return unset
+
+    function firstValue(field) {
+      return field && field.length && field[0] && field[0].value
+        ? String(field[0].value).replace(/^\s+|\s+$/g, "") : ""
+    }
+
+    var parts = [firstValue(area.areaName), firstValue(area.region), firstValue(area.country)]
+    var names = []
+    for (var i = 0; i < parts.length; i++) {
+      if (parts[i] !== "" && names.indexOf(parts[i]) === -1) names.push(parts[i])
+    }
+    return { name: names.join(", "), latitude: latitude, longitude: longitude }
+  } catch (e) {
+    return unset
+  }
+}
+
 // api.weather.gov /points/{lat},{lon} response -> {radarStation, forecastZone, county}.
 function parsePointsResponse(raw) {
   try {
@@ -290,6 +322,7 @@ function notificationCommand(alert) {
 if (typeof module !== "undefined") {
   module.exports = {
     parseLocationFile: parseLocationFile,
+    parseAutoLocationResponse: parseAutoLocationResponse,
     parsePointsResponse: parsePointsResponse,
     parseAlerts: parseAlerts,
     severityRank: severityRank,

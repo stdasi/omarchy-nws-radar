@@ -141,7 +141,9 @@ Panel {
             spacing: Style.space(8)
 
             Text {
-              text: radar.locationName !== "" ? radar.locationName : "No location configured"
+              text: radar.locationName !== ""
+                ? radar.locationName + (radar.locationSource === "auto" ? " (auto)" : "")
+                : (radar.detectingLocation ? "Detecting location…" : "No location configured")
               color: root.barForegroundColor
               font.family: Style.font.family
               font.pixelSize: Style.font.title
@@ -172,10 +174,20 @@ Panel {
           }
 
           Text {
-            visible: radar.configured && !radar.hasLocation
+            visible: radar.configured && !radar.hasLocation && !radar.detectingLocation
             width: parent.width
             text: "No location set. Configure one in the built-in Weather widget."
             color: Qt.darker(root.barForegroundColor, 1.4)
+            font.family: Style.font.family
+            font.pixelSize: Style.font.bodySmall
+            wrapMode: Text.WordWrap
+          }
+
+          Text {
+            visible: radar.locationError !== ""
+            width: parent.width
+            text: radar.locationError
+            color: Color.urgent
             font.family: Style.font.family
             font.pixelSize: Style.font.bodySmall
             wrapMode: Text.WordWrap
