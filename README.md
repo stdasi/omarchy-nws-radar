@@ -29,8 +29,9 @@ notification lets you know before you even open the panel.
   panel open to stay informed. All active alerts remain visible in the panel,
   and clicking a notification opens it.
 - **No API key, no account, no sign-up.** Everything comes from
-  `api.weather.gov` and NWS's public map server, both free and keyless —
-  you just need to tell them who's asking (see [Setup](#setup)).
+  `api.weather.gov` and NWS's public map server, both free and keyless. The
+  plugin identifies itself to NWS automatically; no personal contact details
+  or extra setup are required.
 - Matches your Omarchy theme, with the radar map itself kept on a fixed
   dark background so the county lines and reflectivity colors stay legible
   no matter which theme you're running.
@@ -77,33 +78,17 @@ the full details.
 
 ## Setup
 
-1. **Confirm your location.** This plugin reads an explicitly saved location
-   from Omarchy's built-in Weather widget. If Weather is using its default
-   IP-based auto-detection, NWS Radar performs the same detection itself and
-   labels the location `(auto)`. To override it, click the location name in
-   Weather, search for your city, and select a suggestion. NWS Radar picks up
-   the saved coordinates automatically and never writes that file itself.
-2. **Add a contact for the NWS API.** `api.weather.gov` requires every
-   request to identify who's calling. Set the contact to an email address:
+**Confirm your location.** This plugin reads an explicitly saved location
+from Omarchy's built-in Weather widget. If Weather is using its default
+IP-based auto-detection, NWS Radar performs the same detection itself and
+labels the location `(auto)`. To override it, click the location name in
+Weather, search for your city, and select a suggestion. NWS Radar picks up
+the saved coordinates automatically and never writes that file itself.
 
-   ```sh
-   omarchy bar set stdasi.nws-radar userAgentContact "you@example.com"
-   ```
-
-   Or use a contact URL instead:
-
-   ```sh
-   omarchy bar set stdasi.nws-radar userAgentContact "https://github.com/yourname"
-   ```
-
-   This is contact information for the plugin's `User-Agent` header, not an
-   API key. No shell restart is needed: click the radar icon and press `R`,
-   or middle-click it, to refresh. The configuration warning should disappear
-   and alert polling will begin. Until a contact is set, alerts do not poll,
-   but the radar map still works because the map server has no such
-   requirement.
-
-That's it — no accounts, no tokens.
+That's it — no accounts, tokens, or contact-information setup. The plugin
+identifies itself to `api.weather.gov` with its name, version, and public
+project URL, and alert polling begins automatically once a location is
+available.
 
 ## Usage
 
@@ -116,7 +101,6 @@ That's it — no accounts, no tokens.
 
 | Setting | Default | What it does |
 | --- | --- | --- |
-| NWS API contact | *(empty)* | Your email or URL, sent as required by NWS's API policy. Required before alerts will poll. |
 | Minimum severity to notify | Moderate | The lowest NWS severity that triggers a desktop notification (Extreme > Severe > Moderate > Minor > Unknown). It does not hide active alerts. |
 | Alert poll interval | 300s | How often the plugin checks `api.weather.gov` for new alerts. |
 | Radar image refresh | 300s | How often the open panel checks for a newer radar frame. |
@@ -156,11 +140,12 @@ only every ~5 minutes and can't be composited with alert overlays this way.
 The plugin reads your Weather widget location locally and does not modify it.
 When Weather has no explicitly saved location, the plugin requests `wttr.in`'s
 weather response to derive an approximate location from your public IP. Your
-coordinates and configured contact are sent to `api.weather.gov` when resolving
-the nearby radar station and checking alerts. Radar image requests go to
-`opengeo.ncep.noaa.gov`; their map bounds reveal the approximate center of the
-requested area, but your NWS contact is not sent to either `wttr.in` or the map
-server.
+coordinates and the plugin's fixed public identity (name, version, and project
+URL) are sent to `api.weather.gov` when resolving the nearby radar station and
+checking alerts. No personal contact information is collected. Radar image
+requests go to `opengeo.ncep.noaa.gov`; their map bounds reveal the approximate
+center of the requested area, but the plugin's NWS User-Agent is not sent to
+either `wttr.in` or the map server.
 
 The plugin stores active-alert IDs in Omarchy's persistent plugin properties
 to avoid sending the same desktop notification repeatedly. It stores no radar
