@@ -300,8 +300,12 @@ function trimExpiredIds(notifiedIds, currentAlerts) {
   return kept
 }
 
-function userAgentHeader(appName, contact) {
-  return "User-Agent: " + appName + " (" + contact + ")"
+// api.weather.gov requires a User-Agent that identifies the application.
+// The project URL gives NWS a stable contact route without asking each user
+// to provide personal information. Keep the embedded version in sync with
+// manifest.json; the node tests enforce that release invariant.
+function userAgentValue() {
+  return "OmarchyNwsRadar/0.2.0 (https://github.com/stdasi/omarchy-nws-radar)"
 }
 
 // omarchy-notification-send parses notification content before --exec, and
@@ -336,7 +340,7 @@ if (typeof module !== "undefined") {
     formatFrameAge: formatFrameAge,
     frameAgeMinutes: frameAgeMinutes,
     trimExpiredIds: trimExpiredIds,
-    userAgentHeader: userAgentHeader,
+    userAgentValue: userAgentValue,
     notificationCommand: notificationCommand
   }
 }

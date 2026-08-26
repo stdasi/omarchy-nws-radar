@@ -32,10 +32,7 @@ Item {
   readonly property int radarRefreshIntervalSec: intSetting("radarRefreshIntervalSec", 300, 60, 1800)
   readonly property int radarRangeMiles: intSetting("radarRangeMiles", 150, 25, 500)
   readonly property string minNotifySeverity: String(setting("minNotifySeverity", "Moderate"))
-  readonly property string userAgentContact: String(setting("userAgentContact", ""))
-  readonly property bool configured: userAgentContact.trim() !== ""
-  readonly property string appName: "OmarchyNwsRadar"
-  readonly property string userAgent: Model.userAgentHeader(appName, userAgentContact)
+  readonly property string userAgent: Model.userAgentValue()
 
   // Location, read-only from the file the built-in Weather plugin owns.
   property var locationState: ({ name: "", latitude: null, longitude: null })
@@ -128,8 +125,8 @@ Item {
     if (root.hasLocation) fetchAlerts()
   }
 
-  // The GeoServer radar service needs no API contact, so this is gated on
-  // location alone — the radar renders before userAgentContact is configured.
+  // The GeoServer radar service has no User-Agent policy. Radar refreshes are
+  // gated only on location, independently of the api.weather.gov requests.
   function refreshRadarFrame() {
     if (!root.hasLocation) return
     if (capsProc.running) return
@@ -151,16 +148,16 @@ Item {
     if (key === root._stationForLatLon) return
     if (pointsProc.running) return
     root._stationForLatLon = key
-    pointsProc.command = ["curl", "-fsSL", "--max-time", "10", "-H", root.userAgent,
+    pointsProc.command = ["curl", "-fsSL", "--max-time", "10", "--user-agent", root.userAgent,
       "https://api.weather.gov/points/" + roundedCoord(root.latitude) + "," + roundedCoord(root.longitude)]
     pointsProc.running = true
   }
 
   function fetchAlerts() {
-    if (!root.configured || !root.hasLocation) return
+    if (!root.hasLocation) return
     ensureStation()
     if (alertsProc.running) return
-    alertsProc.command = ["curl", "-fsSL", "--max-time", "10", "-H", root.userAgent,
+    alertsProc.command = ["curl", "-fsSL", "--max-time", "10", "--user-agent", root.userAgent,
       "https://api.weather.gov/alerts/active?point=" + roundedCoord(root.latitude) + "," + roundedCoord(root.longitude)]
     alertsProc.running = true
   }
@@ -264,7 +261,7 @@ Item {
 
   Timer {
     interval: root.alertPollIntervalSec * 1000
-    running: root.configured
+    running: root.hasLocation
     repeat: true
     triggeredOnStart: true
     onTriggered: root.fetchAlerts()

@@ -1,6 +1,10 @@
 const test = require("node:test")
 const assert = require("node:assert/strict")
+const fs = require("node:fs")
+const path = require("node:path")
 const Model = require("../Model.js")
+const manifest = require("../manifest.json")
+const packageJson = require("../package.json")
 
 test("parses and validates shared Weather locations", () => {
   assert.deepEqual(Model.parseLocationFile('{"name":" Amarillo ","latitude":35.2,"longitude":-101.8}'), {
@@ -92,7 +96,15 @@ test("builds the notification command with content before a split click command"
   ])
 })
 
-test("builds the required NWS User-Agent header", () => {
-  assert.equal(Model.userAgentHeader("OmarchyNwsRadar", "user@example.com"),
-    "User-Agent: OmarchyNwsRadar (user@example.com)")
+test("builds a fixed NWS User-Agent with synchronized release versions", () => {
+  assert.equal(Model.userAgentValue(),
+    "OmarchyNwsRadar/0.2.0 (https://github.com/stdasi/omarchy-nws-radar)")
+  assert.match(Model.userAgentValue(), new RegExp("^OmarchyNwsRadar/" + manifest.version.replace(/\\./g, "\\.") + " "))
+  assert.equal(packageJson.version, manifest.version)
+})
+
+test("uses the fixed User-Agent for every NWS API request", () => {
+  const service = fs.readFileSync(path.join(__dirname, "..", "Service.qml"), "utf8")
+  assert.equal((service.match(/"--user-agent", root\.userAgent/g) || []).length, 2)
+  assert.doesNotMatch(service, /userAgentContact|root\.configured/)
 })

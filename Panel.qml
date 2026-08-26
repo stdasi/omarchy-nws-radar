@@ -164,17 +164,7 @@ Panel {
           }
 
           Text {
-            visible: !radar.configured
-            width: parent.width
-            text: "Set an NWS API contact (email or URL) in this widget's settings before it will poll api.weather.gov."
-            color: Color.urgent
-            font.family: Style.font.family
-            font.pixelSize: Style.font.bodySmall
-            wrapMode: Text.WordWrap
-          }
-
-          Text {
-            visible: radar.configured && !radar.hasLocation && !radar.detectingLocation
+            visible: !radar.hasLocation && !radar.detectingLocation
             width: parent.width
             text: "No location set. Configure one in the built-in Weather widget."
             color: Qt.darker(root.barForegroundColor, 1.4)
