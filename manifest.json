@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "stdasi.nws-radar",
   "name": "NWS Radar",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "author": "stdasi",
   "license": "MIT",
   "description": "NWS radar image and severe weather alert notifications, sourced from api.weather.gov",
