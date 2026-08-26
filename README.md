@@ -2,7 +2,7 @@
 
 # NWS Radar
 
-**Live NWS radar imagery and severe weather alerts, right in your [Omarchy](https://omarchy.org/) bar.**
+**Live NWS (US) radar imagery and severe weather alerts, right in your [Omarchy](https://omarchy.org/) bar.**
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Omarchy plugin](https://img.shields.io/badge/omarchy-plugin-6d4aff)](https://omarchy.org/)
@@ -58,6 +58,22 @@ Add the bar icon later if you skip `--enable` now:
 ```sh
 omarchy bar put stdasi.nws-radar --section center
 ```
+
+## Updating
+
+Updates aren't automatic — Omarchy never checks for or fetches new plugin
+code on its own. Pull the latest version yourself with:
+
+```sh
+omarchy plugin update stdasi.nws-radar
+```
+
+(or `omarchy plugin update` with no id to update every git-managed plugin you
+have installed). This shows you the diff before applying it, does a
+fast-forward-only pull, and rolls back automatically if the new version fails
+validation. See the official
+[Omarchy shell plugins manual](https://omarchy.org/manual/shell-plugins/) for
+the full details.
 
 ## Setup
 
