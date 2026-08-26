@@ -65,10 +65,23 @@ omarchy bar put stdasi.nws-radar --section center
    auto-detect) your location once, and NWS Radar picks it up
    automatically. It never writes that file itself.
 2. **Add a contact for the NWS API.** `api.weather.gov` requires every
-   request to identify who's calling. Open this widget's settings and fill
-   in **NWS API contact** with an email address or a URL. Until you do,
-   the panel shows a "not configured" notice and alerts won't poll — but
-   the radar map works right away, since the map server has no such
+   request to identify who's calling. Set the contact to an email address:
+
+   ```sh
+   omarchy bar set stdasi.nws-radar userAgentContact "you@example.com"
+   ```
+
+   Or use a contact URL instead:
+
+   ```sh
+   omarchy bar set stdasi.nws-radar userAgentContact "https://github.com/yourname"
+   ```
+
+   This is contact information for the plugin's `User-Agent` header, not an
+   API key. No shell restart is needed: click the radar icon and press `R`,
+   or middle-click it, to refresh. The configuration warning should disappear
+   and alert polling will begin. Until a contact is set, alerts do not poll,
+   but the radar map still works because the map server has no such
    requirement.
 
 That's it — no accounts, no tokens.
